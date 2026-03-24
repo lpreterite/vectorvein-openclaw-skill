@@ -1,34 +1,20 @@
-# vectorvein (OpenClaw skill)
+# vectorvein-openclaw-skill
 
-An OpenClaw skill that routes `/vectorvein ...` chat commands to a Vectorvein MCP server via `mcporter`, using stable English subcommands.
+OpenClaw skill: `/vectorvein` — run Vectorvein **Open API** workflows from chat.
 
-## Why
+## What it does
 
-Some MCP tools expose non-English or emoji tool names. This skill provides stable English aliases for use in chat.
-
-## Commands
-
-### 1) Bili video → podcast
+This skill provides a single, config-driven entrypoint:
 
 ```text
-/vectorvein bili_video2podcast {"url_or_bvid":"BV..."}
+/vectorvein run <workflowKey> <jsonArgs>
 ```
 
-### 2) Nano Banana image generate
+Workflows are defined in `skill/scripts/workflows.sample.json`.
 
-```text
-/vectorvein nano_banana_image_generate {"prompt":"a cute cat","aspect_ratio":"16:9"}
-```
+## Configure (no secrets in repo)
 
-### 3) Summarize meeting audio
-
-```text
-/vectorvein summarize_meeting_audio {"text":"...","files":["/path/to/audio.m4a"],"show_download":true}
-```
-
-## Configuration (no secrets in repo)
-
-This repo contains **no keys**. Configure credentials in `~/.openclaw/openclaw.json`:
+Put your Vectorvein key in `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -37,8 +23,9 @@ This repo contains **no keys**. Configure credentials in `~/.openclaw/openclaw.j
       "vectorvein": {
         "enabled": true,
         "env": {
-          "VECTORVEIN_MCP_KEY": "YOUR_KEY",
-          "VECTORVEIN_MCP_SERVER_ID": "YOUR_SERVER_ID"
+          "VECTORVEIN_API_KEY": "YOUR_KEY",
+          "VECTORVEIN_API_VERSION": "20240508",
+          "VECTORVEIN_API_BASE_URL": "https://vectorvein.com/api/v1/open-api"
         }
       }
     }
@@ -46,15 +33,12 @@ This repo contains **no keys**. Configure credentials in `~/.openclaw/openclaw.j
 }
 ```
 
-## Requirements
+## Files
 
-- `mcporter` must be available in PATH.
-
-## Security
-
-- The dispatcher reads only `VECTORVEIN_MCP_KEY` and `VECTORVEIN_MCP_SERVER_ID` from env.
-- The skill does not scrape other env vars and does not write to disk.
+- `skill/SKILL.md`
+- `skill/scripts/vectorvein_api_dispatch.mjs`
+- `skill/scripts/workflows.sample.json`
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT (see LICENSE)

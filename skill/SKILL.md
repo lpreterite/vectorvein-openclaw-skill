@@ -1,31 +1,50 @@
 ---
 name: vectorvein
-version: 0.1.0
-author: packy
-description: Run Vectorvein MCP tools via mcporter using stable English subcommands in chat. Use when user types /vectorvein with bili_video2podcast, nano_banana_image_generate, or summarize_meeting_audio.
-metadata: {"openclaw":{"emoji":"🔌","skillKey":"vectorvein","requires":{"bins":["mcporter"],"env":["VECTORVEIN_MCP_KEY","VECTORVEIN_MCP_SERVER_ID"]}}}
+description: Run Vectorvein Open API workflows from chat via /vectorvein, using a single config-driven Node.js dispatcher (no per-workflow functions). Use for workflows like bili_video_transcript (B站音频转文字) and summarize_meeting_audio.
+metadata: {"openclaw":{"emoji":"🔌","skillKey":"vectorvein","requires":{"bins":["node"],"env":["VECTORVEIN_API_KEY"]}}}
 ---
 
-# /vectorvein
+# /vectorvein (Vectorvein Open API)
 
-A thin router that calls Vectorvein MCP tools through `mcporter` using stable English subcommands.
+This skill calls Vectorvein **Open API** (not MCP) using a config-driven dispatcher.
 
-## Subcommands → MCP tool mapping
+## One command shape (config-driven)
 
-- `bili_video2podcast` → `video2podcast_mapper`
-- `nano_banana_image_generate` → `anana`
-- `summarize_meeting_audio` → `🗃️ 会议音频总结`
+Use:
 
-## Usage (recommended)
+- `/vectorvein run <workflowKey> <jsonArgs>`
 
-Send one of:
+Where `workflowKey` is defined in `{baseDir}/scripts/workflows.json`.
 
-- `/vectorvein bili_video2podcast {"url_or_bvid":"BV..."}`
-- `/vectorvein nano_banana_image_generate {"prompt":"...","aspect_ratio":"16:9"}`
-- `/vectorvein summarize_meeting_audio {"text":"...","files":["/path/a.m4a"],"show_download":true}`
+## Built-in workflow keys
+
+- `bili_video_transcript` — 📽️ B站视频原文提取（音频转文字）
+  - args: `{ "url_or_bvid": "https://b23.tv/..." }`
+
+- `summarize_meeting_audio` — 🗃️ 会议音频总结
+  - args: `{ "text": "...", "files": [] }`
+
+- `nano_banana_image_generate` — 🍌 NanoBanana 生图
+  - args: `{ "prompt": "...", "aspect_ratio": "1:1" }`
 
 ## Execution (deterministic)
 
-- Run `{baseDir}/scripts/vectorvein_dispatch.py <subcommand> <jsonArgs>`.
-- The dispatcher reads `VECTORVEIN_MCP_KEY` + `VECTORVEIN_MCP_SERVER_ID` from env and builds the MCP SSE baseUrl at runtime.
-- Calls are made via `mcporter call --http-url ... --tool ... --args ... --output json`.
+When the user sends a message starting with `/vectorvein`:
+
+1) Parse as: `run <workflowKey> <jsonArgs>`.
+2) Execute the bundled Node dispatcher:
+
+- `{baseDir}/scripts/vectorvein_api_dispatch.mjs run <workflowKey> '<jsonArgs>'`
+
+3) Credentials:
+- Reads `VECTORVEIN_API_KEY` from env (configure via OpenClaw skills entry env injection; keep keys out of the repo).
+- API version/baseUrl default to the bundled workflow config but can be overridden with env:
+  - `VECTORVEIN_API_VERSION`
+  - `VECTORVEIN_API_BASE_URL`
+
+4) Return the dispatcher stdout JSON to the user.
+
+## Notes
+
+- This skill intentionally keeps workflow definitions in `workflows.json` so adding a new workflow is config-only.
+- Result polling / fetching output fields depends on Vectorvein Open API result endpoints (add once documented).
