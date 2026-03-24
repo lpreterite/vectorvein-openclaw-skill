@@ -1,5 +1,7 @@
 ---
 name: vectorvein
+version: 0.1.0
+author: packy
 description: Run Vectorvein MCP tools via mcporter using stable English subcommands in chat. Use when user types /vectorvein with bili_video2podcast, nano_banana_image_generate, or summarize_meeting_audio.
 metadata: {"openclaw":{"emoji":"🔌","skillKey":"vectorvein","requires":{"bins":["mcporter"],"env":["VECTORVEIN_MCP_KEY","VECTORVEIN_MCP_SERVER_ID"]}}}
 ---
