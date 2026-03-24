@@ -1,3 +1,4 @@
 SKILL.md
+workflows.md
 scripts/vectorvein_api_dispatch.mjs
 scripts/workflows.sample.json

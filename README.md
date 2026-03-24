@@ -10,7 +10,12 @@ This skill provides a single, config-driven entrypoint:
 /vectorvein run <workflowKey> <jsonArgs>
 ```
 
-Workflows are defined in `skill/scripts/workflows.sample.json`.
+Workflows are **user-defined** after install.
+
+- This repo ships `skill/scripts/workflows.sample.json` only.
+- You create `skill/scripts/workflows.json` locally (not committed).
+
+See: `skill/workflows.md`.
 
 ## Configure (no secrets in repo)
 

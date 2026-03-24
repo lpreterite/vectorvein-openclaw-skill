@@ -116,11 +116,15 @@ async function main() {
 
   const apiKey = (process.env.VECTORVEIN_API_KEY || '').trim();
   if (!apiKey) {
-    die('Missing VECTORVEIN_API_KEY in environment. Configure it in ~/.openclaw/openclaw.json under skills.entries.vectorvein.env');
+    die('Missing VECTORVEIN_API_KEY in environment. Configure it via OpenClaw skill env injection (keep keys out of the repo).');
   }
 
   const baseDir = path.dirname(new URL(import.meta.url).pathname);
-  const configPath = path.join(baseDir, 'workflows.json');
+  // Users define their own workflows after installing the skill.
+  // Prefer workflows.json; fall back to workflows.sample.json for first-run guidance.
+  const workflowsPath = path.join(baseDir, 'workflows.json');
+  const samplePath = path.join(baseDir, 'workflows.sample.json');
+  const configPath = fs.existsSync(workflowsPath) ? workflowsPath : samplePath;
   const cfg = readJson(configPath);
 
   const def = cfg.workflows?.[workflowKey];
