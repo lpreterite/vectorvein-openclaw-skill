@@ -182,7 +182,7 @@ async function cmdPoll(workflowKey, argsObj) {
   }
 
   // Extract task/run ID from submit response
-  const runId = submitResult.body?.data?.id || submitResult.body?.data?.run_id || submitResult.body?.run_id;
+  const runId = submitResult.body?.data?.id || submitResult.body?.data?.run_id || submitResult.body?.data?.rid || submitResult.body?.run_id;
   if (!runId) {
     console.error('[poll] Submit succeeded but no run ID found in response. Response:');
     console.log(JSON.stringify(submitResult.body, null, 2));
@@ -205,22 +205,26 @@ async function cmdPoll(workflowKey, argsObj) {
       die('Poll timeout. Check VectorVein dashboard for task status.');
     }
 
-    const checkResult = await httpRequest('GET', `${baseUrl}/workflow/check-status?run_id=${runId}`, headers);
-    const taskStatus = checkResult.body?.data?.status || checkResult.body?.status;
+    const checkResult = await httpRequest('POST', `${baseUrl}/workflow/check-status`, headers, { rid: runId });
+    const taskStatus = checkResult.body?.msg;
+    const taskHttp = checkResult.body?.status;
 
-    console.error(`[poll] ${(elapsed / 1000).toFixed(0)}s — status: ${taskStatus || 'unknown'}`);
+    console.error(`[poll] ${(elapsed / 1000).toFixed(0)}s — status: ${taskHttp || taskStatus || 'unknown'}`);
 
     // Terminal states
-    if (taskStatus === 'completed' || taskStatus === 'success' || taskStatus === 'succeeded') {
+    if (taskStatus === 'FINISHED' || taskStatus === 'completed' || taskStatus === 'success') {
       console.log(JSON.stringify({ ok: true, status: 200, elapsed_ms: elapsed, body: checkResult.body }, null, 2));
       return;
     }
 
-    if (taskStatus === 'failed' || taskStatus === 'error') {
+    if (taskStatus === 'FAILED' || taskHttp === 500) {
       console.error('[poll] Task failed.');
       console.log(JSON.stringify({ ok: false, status: 500, elapsed_ms: elapsed, body: checkResult.body }, null, 2));
       process.exit(1);
     }
+
+    // Still processing (status 202 or empty msg)
+    // continue polling
   }
 }
 
